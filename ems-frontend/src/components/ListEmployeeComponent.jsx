@@ -6,6 +6,9 @@ const ListEmployeeComponent = () => {
 
     const [employees, setEmployees] = useState([])
 
+    const [showDeletePopup, setShowDeletePopup] = useState(false);
+    const [employeeToDelete, setEmployeeToDelete] = useState(null);
+
     const navigator = useNavigate();
 
     useEffect(() => {
@@ -27,15 +30,38 @@ const ListEmployeeComponent = () => {
         navigator(`/edit-employee/${id}`)
     }
 
-    function removeEmployee(id){
-        console.log(id);
+    // function removeEmployee(id){
+    //     console.log(id);
 
-        deleteEmployee(id).then((response) =>{
-            getAllEmployees();
-        }).catch(error => {
-            console.error(error);
-        })
+    //     deleteEmployee(id).then((response) =>{
+    //         getAllEmployees();
+    //     }).catch(error => {
+    //         console.error(error);
+    //     })
+    // }
+
+    // Show popup and store which employee to delete
+    function confirmDeleteEmployee(id) {
+        setEmployeeToDelete(id);
+        setShowDeletePopup(true);
     }
+
+    function handleDeleteConfirmed() {
+    deleteEmployee(employeeToDelete).then((response) => {
+        getAllEmployees();
+        setShowDeletePopup(false);
+        setEmployeeToDelete(null);
+    }).catch(error => {
+        console.error(error);
+        setShowDeletePopup(false);
+        setEmployeeToDelete(null);
+    });
+}
+
+function handleDeleteCancelled() {
+    setShowDeletePopup(false);
+    setEmployeeToDelete(null);
+}
 
   return (
     <div className='container'>
@@ -54,7 +80,7 @@ const ListEmployeeComponent = () => {
             </thead>
             <tbody>
                 {
-                    employees.map(employee => 
+                    employees.map(employee =>
                         <tr key={employee.id}>
                             <td>{employee.id}</td>
                             <td>{employee.firstName}</td>
@@ -62,15 +88,40 @@ const ListEmployeeComponent = () => {
                             <td>{employee.email}</td>
                             <td>
                                 <button className='btn btn-info' onClick={() => updateEmployee(employee.id)}>Update</button>
-                                <button className='btn btn-danger' onClick={() => removeEmployee(employee.id)}
-                                    style={{marginLeft: '10px'}}
+                                <button className='btn btn-danger' onClick={() => confirmDeleteEmployee(employee.id)}
+                                        style={{ marginLeft: '10px' }}
                                 >Delete</button>
                             </td>
                         </tr>)
                 }
             </tbody>
         </table>
-    </div>
+        {showDeletePopup && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 999
+                }}>
+                    <div style={{
+                        background: 'white',
+                        padding: '2rem',
+                        borderRadius: '8px',
+                        textAlign: 'center',
+                        minWidth: '300px'
+                    }}>
+                        <h4>Are you sure you want to delete this employee?</h4>
+                        <div style={{ marginTop: '1rem' }}>
+                            <button className="btn btn-danger" onClick={handleDeleteConfirmed}>Delete</button>
+                            <button className="btn btn-secondary" onClick={handleDeleteCancelled} style={{ marginLeft: '10px' }}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
   )
 }
 

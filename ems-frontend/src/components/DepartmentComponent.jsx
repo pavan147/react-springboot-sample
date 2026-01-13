@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { createDepartment, getDepartmentById, updateDepartment } from '../services/DepartmentService';
 import { useNavigate, useParams } from 'react-router-dom';
+import ErrorPageComponent from './ErrorPageComponent';
 
 const DepartmentComponent = () => {
 
   const [departmentName, setDepartmentName] = useState('')
   const [departmentDescription, setDepartmentDescription] = useState('')
+
+  const [error, setError] = useState(null);
 
   const {id} = useParams();
 
@@ -27,7 +30,7 @@ const DepartmentComponent = () => {
 
     const department = { departmentName, departmentDescription }
 
-    console.log(department); 
+    console.log(department);
 
     if(id){
       updateDepartment(id, department).then((response) => {
@@ -35,6 +38,7 @@ const DepartmentComponent = () => {
         navigator('/departments');
       }).catch(error => {
         console.error(error);
+         setError("Failed to update employee. Please try again later.");
       })
     }else {
       createDepartment(department).then((response) => {
@@ -42,6 +46,7 @@ const DepartmentComponent = () => {
         navigator('/departments')
       }).catch(error => {
         console.error(error);
+         setError("Failed to SAVE employee. Please try again later.");
       })
     }
 
@@ -57,6 +62,8 @@ const DepartmentComponent = () => {
 
   return (
     <div className='container'><br /><br />
+
+    { error ? <ErrorPageComponent message={error} /> : null }
       <div className='row'>
           <div className='card col-md-6 offset-md-3 offset-md-3'>
               {
